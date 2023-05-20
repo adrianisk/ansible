@@ -1,0 +1,5 @@
+---
+- pause:
+  prompt: Enter password for Pi-hole web interface
+  echo: false
+  register: pi_hole_webpasswd

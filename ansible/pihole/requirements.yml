@@ -1,0 +1,5 @@
+---    
+- name: pihole
+  scm: git
+  version: master
+  src: https://github.com/chubchubsancho/ansible-pi-hole.git

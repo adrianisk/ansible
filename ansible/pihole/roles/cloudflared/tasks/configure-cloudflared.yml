@@ -1,0 +1,56 @@
+---
+- name: Add cloudflared user
+  ansible.builtin.user:
+    name: cloudflared      
+    shell: /sbin/nologin
+    create_home: no
+    groups: admins,developers
+    append: yes
+
+- name: Edit cloudflared startup config
+  ansible.builtin.blockinfile:
+    path: /etc/default/cloudflared
+    create: true
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    block: |
+      # Commandline args for cloudflared, using Cloudflare DNS
+      CLOUDFLARED_OPTS=--port 5053 --upstream https://1.1.1.1/dns-query --upstream https://8.8.8.8/dns-query
+
+- name: Grant ownership of /etc/default/cloudflared to cloudflared user
+  ansible.builtin.file:
+    path: /etc/default/cloudflared
+    owner: cloudflared
+    group: cloudflared
+- name: Grant ownership of /usr/local/bin/cloudflared to cloudflared user
+  ansible.builtin.file:
+    path: /usr/local/bin/cloudflared
+    owner: cloudflared
+    group: cloudflared
+
+- name: Create cloudflared systemd service
+  ansible.builtin.blockinfile:
+    path: /etc/systemd/system/cloudflared.service
+    create: true
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    block: |
+      [Unit]
+      Description=cloudflared DNS over HTTPS proxy
+      After=syslog.target network-online.target
+
+      [Service]
+      Type=simple
+      User=cloudflared
+      EnvironmentFile=/etc/default/cloudflared
+      ExecStart=/usr/local/bin/cloudflared proxy-dns $CLOUDFLARED_OPTS
+      Restart=on-failure
+      RestartSec=10
+      KillMode=process
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Enable and start the service
+  ansible.builtin.service:
+    name: cloudflared
+    enabled: yes
+    state: started

@@ -1,0 +1,32 @@
+- name: Set up development environment
+  hosts: self
+  connection: local
+
+  pre_tasks:
+    - name: (OSX) Install Python libraries used by ansible
+      ansible.builtin.pip:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - pexpect # required for ansible.builtin.expect
+        - keyring # required for ansible.community.keyring
+      tags: always
+      when: ansible_os_family == "Darwin"
+    - name: (Linux) Install Python libraries used by ansible
+      ansible.builtin.pip:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - pexpect # required for ansible.builtin.expect
+      tags: always
+      when: ansible_os_family == "Debian" or ansible_os_family == "Alpine" or ansible_os_family == "Archlinux"
+
+  roles:
+    - role: pihole_config
+    - role: pihole
+      pihole_webpasswd: "{{pi_hole_webpasswd.user_input}}"
+      pi_hole_dns_1: "1.1.1.1"
+      pi_hole_dns_2: "8.8.8.8"
+    - role: cloudflared
+      tags: cloudflared
+    - role: update

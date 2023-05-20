@@ -1,0 +1,7 @@
+- name: Creates a cron file under /etc/cron.d
+  ansible.builtin.cron:
+    name: update_pihole
+    special_time: "daily"
+    user: root
+    job: "bash {{playbook_dir}}/roles/update/tasks/update_pihole.sh"
+    cron_file: update_pihole
