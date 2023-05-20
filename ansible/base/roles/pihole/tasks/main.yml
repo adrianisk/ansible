@@ -1,0 +1,66 @@
+- name: Install base collection of Brew packages
+  become: true
+  community.general.homebrew:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    # Other useful libraries
+    - git # Should already be installed but want to be safe
+    - jq # json query
+    - yq # yaml query
+    - curl # openssl based curl
+    - gnu-sed
+    - gnu-tar
+  when: ansible_os_family == 'Darwin'
+
+- name: Install base collection of apps via Brew Cask
+  become: true
+  community.general.homebrew_cask:
+    name: "{{ item }}"
+    state: latest
+    accept_external_apps: true
+  with_items:
+    - docker
+    - visual-studio-code
+  when: ansible_os_family == 'Darwin'
+
+- name: Update cache and install/update Debian base packages
+  community.general.apt_rpm:
+    update_cache: true
+    pkg:
+      - git
+      - jq
+      - yq
+      - curl
+      - unzip
+      - wget
+      - tree
+    state: latest
+  when: ansible_os_family == 'Debian'
+
+- name: Update repositories and install/update Alpine base packages
+  community.general.apk:
+    name: 
+      - git
+      - jq
+      - yq
+      - curl
+      - unzip
+      - wget
+      - tree
+    state: latest
+    update_cache: true
+    upgrade: true
+
+- name: Update repositories and install/update Archlinux base packages
+  community.general.pacman:
+    name: 
+      - git
+      - jq
+      - yq
+      - curl
+      - unzip
+      - wget
+      - tree
+    state: latest
+    update_cache: true

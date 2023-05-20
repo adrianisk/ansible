@@ -1,0 +1,33 @@
+- name: Set up development environment
+  hosts: self
+  connection: local
+
+  pre_tasks:
+    - name: (OSX) Install Python libraries used by ansible
+      ansible.builtin.pip:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - pexpect # required for ansible.builtin.expect
+        - keyring # required for ansible.community.keyring
+      tags: always
+      when: ansible_os_family == "Darwin"
+    - name: (Linux) Install Python libraries used by ansible
+      ansible.builtin.pip:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - pexpect # required for ansible.builtin.expect
+      tags: always
+      when: ansible_os_family == "Debian" or ansible_os_family == "Alpine" or ansible_os_family == "Archlinux"
+
+  roles:
+    - role: base_osx
+      tags: base
+      when: ansible_os_family == "Darwin"
+    - role: base_debian
+      tags: base
+      when: ansible_os_family == "Debian"
+    - role: base_alpine
+      tags: base
+      when: ansible_os_family == "Alpine"
