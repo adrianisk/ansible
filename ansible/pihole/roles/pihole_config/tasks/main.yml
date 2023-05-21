@@ -1,5 +1,7 @@
 ---
 - pause:
-  prompt: Enter password for Pi-hole web interface
-  echo: false
-  register: pi_hole_webpasswd
+    prompt: Enter password for Pi-hole web interface
+    echo: false
+  register: pi_hole_webpasswd_output
+- set_fact:
+    pi_hole_webpasswd="{{ pi_hole_webpasswd_output.user_input }}"

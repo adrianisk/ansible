@@ -16,17 +16,25 @@
       ((ansible_local.cloudflared is defined) and \
       (ansible_local['cloudflared']['settings']['version'] != cloudflared_latest_release_tag.json.tag_name)) }}"
 
+- set_fact:
+    # Change the architecture to arm64 if the ansible_architecture is aarch64
+    arch: "{{ 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
+
+- set_fact:
+    release_regex: "cloudflared-linux-{{ arch }}: [a-z0-9]+"
+    release_replace_regex: "cloudflared-linux-{{ arch }}: "
+
 - name: 'Find the Checksum of {{ app_name }} installer'
   set_fact:
-    cloudflared_checksum: "{{ cloudflared_latest_release_tag.json.body | regex_search('cloudflared-linux-{{ ansible_architecture }}. .*') \
-      | regex_replace('cloudflared-linux-{{ ansible_architecture }}. ','') }}"
+    cloudflared_checksum: "{{ cloudflared_latest_release_tag.json.body | regex_search(release_regex) \
+      | regex_replace(release_replace_regex,'') }}"
   when:
     - install_cloudflared
     - ansible_system == 'Linux'
 
 - name: 'Ensure {{ app_name }} is installed'
   get_url:
-    url: 'https://github.com/cloudflare/cloudflared/releases/download/{{ cloudflared_latest_release_tag.json.tag_name }}/cloudflared-linux-{{ ansible_architecture }}'
+    url: 'https://github.com/cloudflare/cloudflared/releases/download/{{ cloudflared_latest_release_tag.json.tag_name }}/cloudflared-linux-{{ arch }}'
     dest: /usr/local/bin/cloudflared
     checksum: 'sha256:{{ cloudflared_checksum }}'
     mode: 0755
@@ -36,7 +44,7 @@
 
 - name: 'Ensure {{ app_name }} is installed'
   unarchive:
-    src: 'https://github.com/cloudflare/cloudflared/releases/download/{{ cloudflared_latest_release_tag.json.tag_name }}/cloudflared-darwin-{{ ansible_architecture }}.tgz'
+    src: 'https://github.com/cloudflare/cloudflared/releases/download/{{ cloudflared_latest_release_tag.json.tag_name }}/cloudflared-darwin-{{ arch }}.tgz'
     dest: /usr/local/bin
     remote_src: true
   when:
