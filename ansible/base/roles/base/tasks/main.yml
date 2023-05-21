@@ -25,13 +25,14 @@
     - visual-studio-code
   when: ansible_os_family == 'Darwin'
 
-- name: Update cache and install/update Debian base packages
-  community.general.apt_rpm:
+- name: Install/update Debian base packages
+  become: true
+  ansible.builtin.apt:
     update_cache: true
     pkg:
       - git
       - jq
-      - yq
+      - sqlite3
       - curl
       - unzip
       - wget
@@ -41,11 +42,12 @@
   when: ansible_os_family == 'Debian'
 
 - name: Update repositories and install/update Alpine base packages
+  become: true
   community.general.apk:
     name: 
       - git
       - jq
-      - yq
+      - sqlite3
       - curl
       - unzip
       - wget
@@ -54,13 +56,15 @@
     state: latest
     update_cache: true
     upgrade: true
+  when: ansible_os_family == 'Alpine'
 
 - name: Update repositories and install/update Archlinux base packages
+  become: true
   community.general.pacman:
     name: 
       - git
       - jq
-      - yq
+      - sqlite3
       - curl
       - unzip
       - wget
@@ -68,3 +72,4 @@
       - nano
     state: latest
     update_cache: true
+  when: ansible_os_family == 'Archlinux'

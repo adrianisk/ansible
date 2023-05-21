@@ -22,12 +22,5 @@
       when: ansible_os_family == "Debian" or ansible_os_family == "Alpine" or ansible_os_family == "Archlinux"
 
   roles:
-    - role: base_osx
+    - role: base
       tags: base
-      when: ansible_os_family == "Darwin"
-    - role: base_debian
-      tags: base
-      when: ansible_os_family == "Debian"
-    - role: base_alpine
-      tags: base
-      when: ansible_os_family == "Alpine"

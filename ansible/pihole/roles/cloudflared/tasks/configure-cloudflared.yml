@@ -4,8 +4,6 @@
     name: cloudflared      
     shell: /sbin/nologin
     create_home: no
-    groups: admins,developers
-    append: yes
 
 - name: Edit cloudflared startup config
   ansible.builtin.blockinfile:
@@ -54,3 +52,24 @@
     name: cloudflared
     enabled: yes
     state: started
+
+- name: Set cloudflared as pihole primary dns
+  ansible.builtin.replace:
+    path: /etc/pihole/setupVars.conf
+    backup: true
+    regexp: 'PIHOLE_DNS_1=.*'
+    replace: 'PIHOLE_DNS_1=127.0.0.1#5053'
+
+
+- name: Set Google as pihole secondary dns
+  ansible.builtin.replace:
+    path: /etc/pihole/setupVars.conf
+    backup: true
+    regexp: 'PIHOLE_DNS_2=.*'
+    replace: 'PIHOLE_DNS_2=8.8.8.8#53'
+
+- name: Restart pihole-FTL service
+  ansible.builtin.service:
+    name: pihole-FTL
+    enabled: yes
+    state: restarted

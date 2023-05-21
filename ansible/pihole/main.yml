@@ -24,9 +24,11 @@
   roles:
     - role: pihole_config
     - role: pihole
-      pihole_webpasswd: "{{pi_hole_webpasswd.user_input}}"
+      pihole_webpasswd: "{{ pi_hole_webpasswd }}"
       pi_hole_dns_1: "1.1.1.1"
       pi_hole_dns_2: "8.8.8.8"
+      become: true
     - role: cloudflared
       tags: cloudflared
     - role: update
+      tags: update
